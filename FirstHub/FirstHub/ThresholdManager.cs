@@ -1,8 +1,10 @@
-﻿using System;
+﻿//Auto-generated Namespaces
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+//User Added Namespaces
 
 namespace FirstHub
 {
@@ -55,7 +57,7 @@ namespace FirstHub
                 //Send a copy of this object, and an empty set of Event Arguements
                 onUnderThreshold(this, new EventArgs());
             }
-            //If theshold hs0 toggled
+            //If theshold has toggled
             if (_thresholdToggled)
             {
                 //Toggle Threshold
@@ -82,16 +84,21 @@ namespace FirstHub
         //Make a public facing int to evaluate against Threshold
         public int current
         {
-            set{
+            set
+            {
                 //Check the value of the int compared to Threshold
-                if (value > _threshold){
+                if (value > _threshold)
+                {
                     //If is is over, run the OverThreshold Function
                     OverThreshold();
-                }else{
+                }
+                else
+                {
                     //Otherwise consider it to be under the threshold
                     UnderThreshold();
                 }
             }
+        }
 
     }
 }
