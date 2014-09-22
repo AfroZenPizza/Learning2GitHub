@@ -18,21 +18,64 @@ namespace FirstHub
         /// </summary>
         private void Run()
         {
+            string line; // Will be used to handle input from the Console
+            bool looping = true; //Used to keep the program looping while waiting for user to request exit
+            
+            //Let the user know what commands are availiable
+            WriteCommandList();
+            
+            //Create Thread that runs the Cpu Monitoring Thread (function)
+            Thread cpuMonitor = new Thread(new ThreadStart(CpuMonitorThread));
+            
+            //Start The Thread -- Note, this is not set to background, and will cause the program to run
+            //as long as it remains alive
+            cpuMonitor.Start();
+            
+            //Enter an infinate loop
+            while (looping)
+            { 
+                //Read a line from the console, and store it as a string
+                line = Console.ReadLine();
+                //Check the user input for a command that is known
+                switch (line.ToLower())
+                {
+                    case "!quit":
+                        looping = false; // Changes the looping status so the looping ends
+                        break;
+                    case "!clear":
+                        Console.Clear();
+                        break;
+                    case "!help":
+                        WriteCommandList();
+                        break;
+                }
+            }
+            cpuMonitor.Abort(); //Ends the Cpu Monitor Thread so that the program can exit
+        }
+
+        /// <summary>
+        /// Monitorign Fucntion to be runs a thread.
+        /// Should be invoked as a thread start
+        /// !DOES NOT SELF TERMINATE!
+        /// </summary>
+        private void CpuMonitorThread()
+        {
+            Console.WriteLine("[Info] Cpu Monitoring Started");
             //Create a performance monitor to get out CPU utilization
-            PerformanceCounter cpuCounter = new PerformanceCounter("Processor Information", "% Processor Time", "_Total");           
+            PerformanceCounter cpuCounter = new PerformanceCounter("Processor Information", "% Processor Time", "_Total");
             //Create an instance of Threshold Manager, that alerts on 90%
             ThresholdManager cpuThreshold = new ThresholdManager(90);
             //Register an event to fire when CPU is over 90% utilized
-            cpuThreshold.onOverThresholdToggle += new EventHandler(onCpuOverThresholdToggle);
+            cpuThreshold.onOverThresholdToggle += new EventHandler(OnCpuOverThresholdToggleEvent);
             //Register an event to fire when CPU returns to under 90%
-            cpuThreshold.onUnderThresholdToggle += new EventHandler(onCpuUnderThresholdToggle);
+            cpuThreshold.onUnderThresholdToggle += new EventHandler(OnCpuUnderThresholdToggleEvent);
             while (true) // Create an infinate loop
             {
                 //Set current Threshold Comparator to the Performance Monitor's Next Value typecasted as an int from Double
                 cpuThreshold.current = (int)cpuCounter.NextValue();
                 //Sleep this thread to make sure we don't use an unfair amount of the CPU
                 Thread.Sleep(32);
-            }
+            }                
         }
 
         /// <summary>
@@ -40,10 +83,10 @@ namespace FirstHub
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void onCpuOverThresholdToggle(object sender, EventArgs e)
+        private void OnCpuOverThresholdToggleEvent(object sender, EventArgs e)
         {
             //Warn User
-            Console.WriteLine("Warning: CPU Utilization over threshold!");
+            Console.WriteLine("[Warning] CPU Utilization over threshold!");
         }
 
         /// <summary>
@@ -51,10 +94,20 @@ namespace FirstHub
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void onCpuUnderThresholdToggle(object sender, EventArgs e)
+        private void OnCpuUnderThresholdToggleEvent(object sender, EventArgs e)
         {
             //Warn User
-            Console.WriteLine("Info: CPU Utilization returned to accpetable value");
+            Console.WriteLine("[Info] CPU Utilization returned to accpetable value");
+        }
+
+
+        //Simple Function to inform the user of availiable commands
+        private void WriteCommandList()
+        {
+            Console.WriteLine("Commands:");
+            Console.WriteLine("  !quit  : Ends the program");
+            Console.WriteLine("  !clear : Clears the console");
+            Console.WriteLine("  !help : Gives command list");
         }
 
         /// <summary>
