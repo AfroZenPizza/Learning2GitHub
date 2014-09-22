@@ -10,6 +10,8 @@ namespace FirstHub
     {
         static void Main(string[] args)
         {
+            //Write a line to the console
+            Console.WriteLine("Hello GitHub");
         }
     }
 }
